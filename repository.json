@@ -1,5 +1,5 @@
 {
   "name": "EasyNAS Add-on Repository",
-  "url": "https://github.com/gregorwolf1973/EasyNas-HASSIO-Addon",
-  "maintainer": "gregorwolf1973"
+  "url": "https://github.com/mirican/EasyNas-HASSIO-Addon",
+  "maintainer": "mirican (fork of gregorwolf1973)"
 }
