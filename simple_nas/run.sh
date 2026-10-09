@@ -297,8 +297,17 @@ fi
 
 # 3) WSDD – WS-Discovery (Windows 10/11 network browser)
 if command -v wsdd > /dev/null 2>&1; then
-    python3 /usr/local/bin/wsdd --workgroup "${WORKGROUP}" --hostname "${NAS_NAME}" &
-    bashio::log.info "WSDD started (WS-Discovery for Windows 10/11, hostname=${NAS_NAME})"
+    # Bind to the LAN interface (default route) only. On multi-interface hosts
+    # (docker0, hassio bridges) binding to all interfaces breaks multicast
+    # announcements and the NAS never shows up in the Windows "Network" folder.
+    WSDD_IFACE="$(ip -o route show default 2>/dev/null | awk '{print $5; exit}')"
+    if [ -n "${WSDD_IFACE}" ]; then
+        python3 /usr/local/bin/wsdd --workgroup "${WORKGROUP}" --hostname "${NAS_NAME}" --interface "${WSDD_IFACE}" &
+        bashio::log.info "WSDD started (WS-Discovery, interface=${WSDD_IFACE}, hostname=${NAS_NAME})"
+    else
+        python3 /usr/local/bin/wsdd --workgroup "${WORKGROUP}" --hostname "${NAS_NAME}" &
+        bashio::log.warning "WSDD started without interface restriction (no default route found)"
+    fi
 else
     bashio::log.warning "wsdd not installed"
 fi
